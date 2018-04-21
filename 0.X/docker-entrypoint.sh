@@ -64,7 +64,7 @@ elif vault --help "$1" 2>&1 | grep -q "vault $1"; then
 fi
 
 # If we are running Vault, make sure it executes as the proper user.
-if [ "$1" = 'vault' ]; then
+if [[ "$1" = 'vault' && false ]]; then
     # If the config dir is bind mounted then chown it
     if [ "$(stat -c %u /vault/config)" != "$(id -u vault)" ]; then
         chown -R vault:vault /vault/config || echo "Could not chown /vault/config (may not have appropriate permissions)"

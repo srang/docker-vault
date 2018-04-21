@@ -43,7 +43,8 @@ RUN set -eux; \
 RUN mkdir -p /vault/logs && \
     mkdir -p /vault/file && \
     mkdir -p /vault/config && \
-    chown -R vault:vault /vault
+    chgrp -R 0 /vault && \
+    chmod -R g=u /vault
 
 # Expose the logs directory as a volume since there's potentially long-running
 # state in there

@@ -63,37 +63,5 @@ elif vault --help "$1" 2>&1 | grep -q "vault $1"; then
     set -- vault "$@"
 fi
 
-# If we are running Vault, make sure it executes as the proper user.
-if [[ "$1" = 'vault' && false ]]; then
-    # If the config dir is bind mounted then chown it
-    if [ "$(stat -c %u /vault/config)" != "$(id -u vault)" ]; then
-        chown -R vault:vault /vault/config || echo "Could not chown /vault/config (may not have appropriate permissions)"
-    fi
-
-    # If the logs dir is bind mounted then chown it
-    if [ "$(stat -c %u /vault/logs)" != "$(id -u vault)" ]; then
-        chown -R vault:vault /vault/logs
-    fi
-
-    # If the file dir is bind mounted then chown it
-    if [ "$(stat -c %u /vault/file)" != "$(id -u vault)" ]; then
-        chown -R vault:vault /vault/file
-    fi
-
-    if [ -z "$SKIP_SETCAP" ]; then
-        # Allow mlock to avoid swapping Vault memory to disk
-        setcap cap_ipc_lock=+ep $(readlink -f $(which vault))
-
-        # In the case vault has been started in a container without IPC_LOCK privileges
-        if ! vault -version 1>/dev/null 2>/dev/null; then
-            >&2 echo "Couldn't start vault with IPC_LOCK. Disabling IPC_LOCK, please use --privileged or --cap-add IPC_LOCK"
-            setcap cap_ipc_lock=-ep $(readlink -f $(which vault))
-        fi
-    fi
-
-    if [ "$(id -u)" = '0' ]; then
-      set -- su-exec vault "$@"
-    fi
-fi
 
 exec "$@"
